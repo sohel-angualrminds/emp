@@ -9,7 +9,8 @@ export const putDataToLocalStorage = async (key, value) => {
 
 export const getOneData = async (key, value) => {
     const data = await getDataFromLocalStorage(key);
-    return data.find(({ id }) => id === value);
+    let d = data.find(item => item.id == value);
+    return d;
 }
 
 export const updateData = async (key, value) => {

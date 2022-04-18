@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from "react-router-dom"
 import { useState, useEffect } from 'react'
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
@@ -15,13 +16,14 @@ import IconButton from '@mui/material/IconButton';
 let color = [deepOrange, deepPurple];
 
 function Employees() {
+    const navigate = useNavigate();
     const [rows, setRows] = useState([])
 
     const getDataTo = (res) => {
-        let res2 = res.map(({ name, email, mobileNumber }, index) => {
+        let res2 = res.map(({ id, name, email, mobileNumber }, index) => {
             return (
                 {
-                    id: index,
+                    id: id,
                     Name: name,
                     Email: email,
                     Phone: mobileNumber
@@ -38,6 +40,10 @@ function Employees() {
         let nres = rows.filter((item) => item.id !== params.row.id)
         putDataToLocalStorage("employeedata", nres);
         setRows(nres);
+    }
+
+    const gotoUpdate = (params) => {
+        navigate(`/employees/UPDATE/${params.row.id}`, { replace: true })
     }
 
     const columns = [
@@ -66,7 +72,7 @@ function Employees() {
         {
             field: 'Actions',
             headerName: 'Actions',
-            type: 'String',
+            type: 'string',
             sortable: false,
             width: 110,
             renderCell: (params) => {
@@ -75,7 +81,7 @@ function Employees() {
                     <Stack direction="row" spacing={1}>
                         <Tooltip title="Edit" key={params.id}>
                             <IconButton
-                                onClick={() => { }}
+                                onClick={() => { gotoUpdate(params) }}
                             >
                                 <ModeEditOutlineIcon />
                             </IconButton>
@@ -109,8 +115,7 @@ function Employees() {
         async function get() {
             let res = await getDataFromLocalStorage("employeedata");
             res = res ? res : [];
-
-            const res2 = getDataTo(res)
+            const res2 = getDataTo(res);
             setRows(res2);
         }
         get();

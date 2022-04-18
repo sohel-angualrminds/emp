@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -21,14 +20,18 @@ import Typography from '@mui/material/Typography';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import { getDataFromLocalStorage, putDataToLocalStorage, getOneData } from '../Service/Service'
+import { getDataFromLocalStorage, getOneData, putDataToLocalStorage } from '../Service/Service'
 
+import { useParams } from 'react-router-dom';
 const l = (arg) => console.log(arg)
-let initailData = { gender: "female" }
+
+
+let initailData = { gender: "female", name: '', mobileNumber: '', email: '', password: '', address: '', state: '', city: '' };
+
 
 
 function Update() {
-    const params = useParams();
+    let params = useParams();
     const [value, setValue] = React.useState('');
     const [sliderValue, setSliderValue] = React.useState(0);
     const [locationData, setLocationData] = useState({ citiesData: [], statesData: [] });
@@ -66,15 +69,24 @@ function Update() {
     useEffect(() => {
         const get = async () => {
             const { states, cities } = await getDataFromLocalStorage('locationData');
-            setLocationData({ statesData: states, citiesData: cities });
+            let res = await getOneData('employeedata', params.id);
+            let s = states.filter(item => item.name === res.state);
+            let cres = cities.filter((city) => city.stateCode === s[0].isoCode)
 
-            const data = await getOneData('employeedata', params.id)
-            l(data);
-
+            setLocationData({ statesData: states, citiesData: cres });
+            setFinalObj(res);
         }
         if (locationData.statesData.length === 0)
             get();
     }, [])
+
+
+    useEffect(() => {
+        if (selectedState.isoCode) {
+            setLocationData({ ...locationData.states, citiesData: locationData.citiesData.filter((city) => city.stateCode === selectedState) });
+        }
+    }, [selectedState])
+
 
     const handleChange = (event, newValue) => {
         if (typeof newValue === 'number') {
@@ -108,6 +120,7 @@ function Update() {
                             color="success"
                             variant="outlined"
                             size="small"
+                            value={FinalObj.name}
                             sx={{ width: 300, color: "success" }}
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, name: e.target.value })
@@ -131,6 +144,7 @@ function Update() {
                             variant="outlined"
                             size="small"
                             sx={{ width: 300, color: "success" }}
+                            value={FinalObj.email}
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, email: e.target.value })
                             }}
@@ -145,7 +159,7 @@ function Update() {
                             variant="outlined"
                             size="small"
                             sx={{ width: 300, color: "success" }}
-
+                            value={FinalObj.password}
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, password: e.target.value })
                             }}
@@ -158,8 +172,10 @@ function Update() {
                             color="success"
                             variant="outlined"
                             size="small"
+                            max={10}
                             min={10}
                             sx={{ width: 300, color: "success" }}
+                            value={FinalObj.mobileNumber}
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, mobileNumber: e.target.value })
                             }}
@@ -180,7 +196,6 @@ function Update() {
                             placeholder="Enter Address"
                             style={{ width: 300 }}
                             value={FinalObj.address}
-
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, address: e.target.value })
                             }}
@@ -198,10 +213,12 @@ function Update() {
                                 id="states"
                                 options={locationData.statesData}
                                 getOptionLabel={(state) => state.name}
+                                value={FinalObj.state ? { name: FinalObj.state } : { name: '' }}
                                 onChange={(e, newValue) => {
                                     e.preventDefault();
                                     if (newValue !== null) {
-                                        setSelectedState(newValue.isoCode)
+                                        console.log(newValue);
+                                        setSelectedState({ name: newValue.name, isoCode: newValue.isoCode })
                                         setFinalObj({ ...FinalObj, state: newValue.name })
                                     }
                                     else {
@@ -219,14 +236,16 @@ function Update() {
                                         sx={{ width: 140, color: "success", ml: 19 }}
                                     />
                                 }
+
                             />
 
-                            <Autocomplete
+                            {/* <Autocomplete
                                 size="small"
                                 variant="outlined"
                                 id="cities"
-                                options={locationData.citiesData.filter((city) => city.stateCode === selectedState)}
+                                options={locationData.citiesData}
                                 getOptionLabel={(city) => city.name}
+                                value={FinalObj.city ? { name: FinalObj.city } : { name: '' }}
                                 onChange={(e, newValue) => {
                                     e.preventDefault();
                                     if (newValue !== null) {
@@ -247,7 +266,7 @@ function Update() {
                                         sx={{ width: 140, color: "success", ml: 2 }}
                                     />
                                 }
-                            />
+                            /> */}
                         </Box>
 
                         <LocalizationProvider dateAdapter={AdapterDateFns}>

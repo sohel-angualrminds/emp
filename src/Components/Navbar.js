@@ -31,27 +31,25 @@ const Navbar = () => {
                     </Link>
                     <Box sx={{ justifyContent: 'flex-end', flexGrow: 1, display: { xs: 'flex', md: 'flex' } }}>
                         {pages.map((page) => (
-
-                            <Button
-                                key={page.text}
-                                sx={{ my: 2, color: 'white', display: 'block', textDecoration: "none" }}
+                            <Link to={`${page.path}`} key={`${page.path}`}
+                                style={{
+                                    textDecoration: "none",
+                                    color: "white"
+                                }}
                             >
-                                <Link to={`${page.path}`} key={`${page.path}`}
-                                    style={{
-                                        textDecoration: "none",
-                                        color: "white"
-                                    }}
-
+                                <Button
+                                    key={page.text}
+                                    sx={{ my: 2, color: 'white', display: 'block', textDecoration: "none" }}
                                 >
                                     {page.text}
-                                </Link>
-                            </Button>
+                                </Button>
+                            </Link>
 
                         ))}
                     </Box>
                 </Toolbar>
             </Container>
-        </AppBar>
+        </AppBar >
     );
 };
 export default Navbar;

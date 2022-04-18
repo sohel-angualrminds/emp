@@ -21,10 +21,11 @@ import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import { getDataFromLocalStorage, putDataToLocalStorage } from '../Service/Service'
-const lawde = (arg) => console.log(arg)
+const l = (arg) => console.log(arg)
 
 
-let initailData = { gender: "female", name: '', mobileNumber: '' }
+let initailData = { gender: "female", name: '', mobileNumber: '', email: '', password: '', address: '' };
+
 function Add() {
     const [value, setValue] = React.useState('');
     const [sliderValue, setSliderValue] = React.useState(0);
@@ -44,6 +45,7 @@ function Add() {
 
         let obj1 = {
             ...obj,
+            id: new Date().getTime(),
             checkbox
         }
 
