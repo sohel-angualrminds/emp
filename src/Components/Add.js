@@ -24,7 +24,7 @@ import { getDataFromLocalStorage, putDataToLocalStorage } from '../Service/Servi
 const l = (arg) => console.log(arg)
 
 
-let initailData = { gender: "female" }
+let initailData = { gender: "female", name: '', mobileNumber: '' }
 function Add() {
     const [value, setValue] = React.useState('');
     const [sliderValue, setSliderValue] = React.useState(0);
