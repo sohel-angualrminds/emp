@@ -17,20 +17,20 @@ let color = [deepOrange, deepPurple];
 function Employees() {
     const [rows, setRows] = useState([])
 
-    // const getDataTo = (res) => {
-    //     let res2 = res.map(({ name, email, mobileNumber }, index) => {
-    //         return (
-    //             {
-    //                 id: index,
-    //                 Name: name,
-    //                 Email: email,
-    //                 Phone: mobileNumber
-    //             }
-    //         )
+    const getDataTo = (res) => {
+        let res2 = res.map(({ name, email, mobileNumber }, index) => {
+            return (
+                {
+                    id: index,
+                    Name: name,
+                    Email: email,
+                    Phone: mobileNumber
+                }
+            )
 
-    //     })
-    //     return res2;
-    // }
+        })
+        return res2;
+    }
 
 
 
@@ -109,7 +109,9 @@ function Employees() {
         async function get() {
             let res = await getDataFromLocalStorage("employeedata");
             res = res ? res : [];
-            setRows(res);
+
+            const res2 = getDataTo(res)
+            setRows(res2);
         }
         get();
     }, [])

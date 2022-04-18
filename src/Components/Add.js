@@ -21,7 +21,7 @@ import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import { getDataFromLocalStorage, putDataToLocalStorage } from '../Service/Service'
-const l = (arg) => console.log(arg)
+const lawde = (arg) => console.log(arg)
 
 
 let initailData = { gender: "female", name: '', mobileNumber: '' }
