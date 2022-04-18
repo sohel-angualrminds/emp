@@ -75,6 +75,8 @@ function Update() {
 
             setLocationData({ statesData: states, citiesData: cres });
             setFinalObj(res);
+            setSliderValue(res.rate);
+            setCheckbox(res.checkbox)
         }
         if (locationData.statesData.length === 0)
             get();
@@ -82,9 +84,18 @@ function Update() {
 
 
     useEffect(() => {
-        if (selectedState.isoCode) {
-            setLocationData({ ...locationData.states, citiesData: locationData.citiesData.filter((city) => city.stateCode === selectedState) });
+
+
+        const get = async () => {
+            const { states, cities } = await getDataFromLocalStorage('locationData');
+            let cres = cities.filter((city) => city.stateCode === selectedState.isoCode)
+            // l(cres)
+            setLocationData({ statesData: states, citiesData: cres });
+            // setFinalObj(res);
         }
+        if (selectedState.isoCode)
+            get();
+
     }, [selectedState])
 
 
@@ -217,12 +228,11 @@ function Update() {
                                 onChange={(e, newValue) => {
                                     e.preventDefault();
                                     if (newValue !== null) {
+                                        setFinalObj({ ...FinalObj, state: newValue.name })
                                         console.log(newValue);
                                         setSelectedState({ name: newValue.name, isoCode: newValue.isoCode })
-                                        setFinalObj({ ...FinalObj, state: newValue.name })
                                     }
                                     else {
-                                        setSelectedState('')
                                         setFinalObj({ ...FinalObj, state: '' })
                                     };
                                 }}
@@ -232,6 +242,7 @@ function Update() {
                                         size="small"
                                         {...params}
                                         id="states"
+
                                         label="Select State"
                                         sx={{ width: 140, color: "success", ml: 19 }}
                                     />
@@ -239,7 +250,7 @@ function Update() {
 
                             />
 
-                            {/* <Autocomplete
+                            <Autocomplete
                                 size="small"
                                 variant="outlined"
                                 id="cities"
@@ -266,7 +277,7 @@ function Update() {
                                         sx={{ width: 140, color: "success", ml: 2 }}
                                     />
                                 }
-                            /> */}
+                            />
                         </Box>
 
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -274,7 +285,7 @@ function Update() {
                                 disableFuture
                                 openTo="year"
                                 views={['day', 'month', 'year']}
-                                value={value}
+                                value={FinalObj.dob}
                                 onChange={(newValue) => {
                                     setValue(newValue);
                                     setFinalObj({ ...FinalObj, dob: newValue })
@@ -375,7 +386,7 @@ function Update() {
                             <Button
                                 type="submit"
                                 color="success"
-                                variant="contained">Submit</Button>
+                                variant="contained">Update</Button>
                             <Button type="cancel" color="error" variant="outlined">Cancel</Button>
                         </Stack>
 
