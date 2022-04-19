@@ -84,6 +84,7 @@ function Employees() {
         get();
     }, [])
 
+    console.log(rows);
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
@@ -104,9 +105,7 @@ function Employees() {
                         <TableRow>
                             {columns.map((column) => (
                                 <TableCell
-                                    key={column.id}
-                                    align={column.align}
-                                    style={{ minWidth: column.minWidth }}
+                                    key={column.field}
                                 >
                                     {column.headerName}
                                 </TableCell>
@@ -118,30 +117,29 @@ function Employees() {
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row) => {
                                 return (
-                                    <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                                        <TableCell>
+                                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                                        <TableCell key={row.id}>
                                             <Avatar sx={{
                                                 bgcolor: color[0][500]
                                             }}>
                                                 {
-                                                    `${row.Name.split('')[0].toUpperCase()}`
-                                                    // 'A'
+                                                    `${row.Name ? row.Name.split('')[0].toUpperCase() : ''}`
                                                 }
                                             </Avatar >
                                         </TableCell>
                                         <TableCell>{row.Name}</TableCell>
                                         <TableCell>{row.Email}</TableCell>
                                         <TableCell>{row.Phone}</TableCell>
-                                        <TableCell>
+                                        <TableCell key={row.name}>
                                             <Stack direction="row" spacing={1}>
-                                                <Tooltip title="Edit" key={row.id}>
+                                                <Tooltip title="Edit" key={row.Phone}>
                                                     <IconButton
                                                         onClick={() => { gotoUpdate(row) }}
                                                     >
                                                         <ModeEditOutlineIcon />
                                                     </IconButton>
                                                 </Tooltip>
-                                                <Tooltip title="Delete">
+                                                <Tooltip title="Delete" key={row.dob}>
                                                     <IconButton
                                                         onClick={() => {
                                                             deleteData(row);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -22,8 +23,6 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import { getDataFromLocalStorage, putDataToLocalStorage } from '../Service/Service'
 import { toast } from 'react-toastify';
-const l = (arg) => console.log(arg)
-
 
 let initailData = { gender: "female", name: '', mobileNumber: '', email: '', password: '', address: '' };
 
@@ -31,6 +30,7 @@ let initailData = { gender: "female", name: '', mobileNumber: '', email: '', pas
 
 
 function Add() {
+    let Navigate = useNavigate();
     const [value, setValue] = React.useState('');
     const [sliderValue, setSliderValue] = React.useState(0);
     const [locationData, setLocationData] = useState({ citiesData: [], statesData: [] });
@@ -58,7 +58,9 @@ function Add() {
         res.push(obj1);
 
         await putDataToLocalStorage("employeedata", res);
-        toast('🦄 Wow so easy!', {
+        Navigate("/");
+
+        toast.success('Employee Data Added SuccesFully', {
             position: "top-right",
             autoClose: 5000,
             hideProgressBar: false,
@@ -154,6 +156,7 @@ function Add() {
                             variant="outlined"
                             size="small"
                             error={Error.name.status}
+                            helperText={Error.name.text}
                             sx={{ width: 300, color: "success" }}
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, name: e.target.value })
@@ -177,12 +180,13 @@ function Add() {
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, email: e.target.value })
                                 if (!e.target.value.includes('@') || !e.target.value.includes('.'))
-                                    setError({ ...Error, email: { status: false, text: 'please include @ and .' } })
+                                    setError({ ...Error, email: { status: false, text: 'please include @ and (.) sign' } })
                                 else {
                                     setError({ ...Error, email: { status: false, text: '' } })
                                 }
                             }}
                             onBlur={validate.emailValidate}
+                            required
                         />
 
                         <TextField

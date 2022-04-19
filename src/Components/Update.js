@@ -22,10 +22,7 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import { getDataFromLocalStorage, getOneData, updateData } from '../Service/Service'
 import { useParams, useNavigate } from 'react-router-dom';
-
-
-const l = (arg) => console.log(arg)
-
+import { toast } from 'react-toastify';
 
 let initailData = { gender: "female", name: '', mobileNumber: '', email: '', password: '', address: '', state: '', city: '' };
 
@@ -39,34 +36,74 @@ function Update() {
     const [locationData, setLocationData] = useState({ citiesData: [], statesData: [] });
     const [selectedState, setSelectedState] = useState('');
     const [checkbox, setCheckbox] = useState(() => new Array(5).fill(false));
-    const [Error, setError] = useState({});
+    const [Error, setError] = useState({ name: false, email: { status: false, text: "" }, mobileNumber: { status: false, text: "" } });
 
     const [FinalObj, setFinalObj] = useState(initailData);
 
     const submitData = async (e, obj) => {
         e.preventDefault();
-        if (Error.name === true || Error.mobileNumber === true) {
+        if (Error.name.status === true || Error.mobileNumber.status === true || Error.email.status === true) {
             alert("please provide proper information")
-
             return;
         }
-
         let obj1 = {
             ...obj,
             rate: sliderValue,
             checkbox
         }
-
-        // l(obj1);
         await updateData('employeedata', obj1);
-        setFinalObj(initailData);
         Navigate("/");
+        toast.success('Employee Data Updated SuccesFully', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+        setFinalObj(initailData);
+
     }
 
     const handleCheckbox = (e) => {
         let check = checkbox;
         check[Number(e.target.id)] = !check[Number(e.target.id)]
         setCheckbox(JSON.parse(JSON.stringify(check)));
+    }
+    const validate = {
+        mobileValidate: (e) => {
+            if (e.target.value.length !== 10) {
+                setError({
+                    ...Error, mobileNumber: {
+                        status: true,
+                        text: `length of mobile number should be 10 you enter ${e.target.value.length}`
+                    }
+                })
+            }
+            else {
+                setError({
+                    ...Error, mobileNumber: {
+                        status: false,
+                        text: ``
+                    }
+                })
+            }
+        },
+        emailValidate(e) {
+            if (FinalObj.email === '' || !FinalObj.email.includes('@') || !FinalObj.email.includes('.'))
+                setError({ ...Error, email: { status: true, text: 'please include @ and . sign' } })
+            else {
+                setError({ ...Error, email: { status: false, text: '' } })
+            }
+        },
+        nameValidate(e) {
+            if (FinalObj.name.length <= 0) {
+                setError({ ...Error, name: { status: true, text: "insert name its required" } })
+            } else {
+                setError({ ...Error, name: { status: false, text: '' } })
+            }
+        }
     }
 
     useEffect(() => {
@@ -87,8 +124,6 @@ function Update() {
 
 
     useEffect(() => {
-
-
         const get = async () => {
             const { states, cities } = await getDataFromLocalStorage('locationData');
             let cres = cities.filter((city) => city.stateCode === selectedState.isoCode)
@@ -113,12 +148,12 @@ function Update() {
 
     return (
         <React.Fragment>
-            <Container maxWidth="xl" sx={{ bgcolor: 'whitesmoke', display: "flex", justifyContent: "center" }}
+            <Container maxWidth="xl" sx={{ bgcolor: 'whitesmoke', display: "flex", justifyContent: "center", overflow: 'hidden' }}
             >
                 <Card sx={{ maxWidth: "50%", my: 10, textAlign: 'center', overflow: "auto" }}>
                     <CardHeader
-                        subheader="Please Fill The Form"
-                        sx={{ color: "success" }}
+                        subheader="Update Employee Data"
+                        sx={{ color: "success", textAlign: "center" }}
                     />
                     <Box
                         component="form"
@@ -136,16 +171,13 @@ function Update() {
                             size="small"
                             value={FinalObj.name}
                             sx={{ width: 300, color: "success" }}
+                            error={Error.name.status}
+                            helperText={Error.name.text}
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, name: e.target.value })
+                                setError({ ...Error, name: { status: false, text: '' } })
                             }}
-                            onBlur={(e) => {
-                                if (FinalObj.name.length <= 0) {
-                                    setError({ ...Error, name: true })
-                                } else {
-                                    setError({ ...Error, name: false })
-                                }
-                            }}
+                            onBlur={validate.nameValidate}
                             required
                         />
 
@@ -157,12 +189,20 @@ function Update() {
                             color="success"
                             variant="outlined"
                             size="small"
+                            error={Error.email.status}
+                            helperText={Error.email.text}
                             sx={{ width: 300, color: "success" }}
                             value={FinalObj.email}
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, email: e.target.value })
+                                if (!e.target.value.includes('@') || !e.target.value.includes('.'))
+                                    setError({ ...Error, email: { status: false, text: 'please include @ and .' } })
+                                else {
+                                    setError({ ...Error, email: { status: false, text: '' } })
+                                }
                             }}
-
+                            onBlur={validate.emailValidate}
+                            required
                         />
 
                         <TextField
@@ -192,15 +232,16 @@ function Update() {
                             value={FinalObj.mobileNumber}
                             onChange={(e) => {
                                 setFinalObj({ ...FinalObj, mobileNumber: e.target.value })
+                                setError({
+                                    ...Error, mobileNumber: {
+                                        status: false,
+                                        text: `length of mobile number should be 10 you enter ${e.target.value.length}`
+                                    }
+                                })
                             }}
-                            onBlur={(e) => {
-                                if (FinalObj.mobileNumber.length === 10) {
-                                    setError({ ...Error, mobileNumber: false })
-                                }
-                                else {
-                                    setError({ ...Error, mobileNumber: true })
-                                }
-                            }}
+                            error={Error.mobileNumber.status}
+                            helperText={Error.mobileNumber.text}
+                            onBlur={validate.mobileValidate}
                         />
                         <br />
 
@@ -214,6 +255,29 @@ function Update() {
                                 setFinalObj({ ...FinalObj, address: e.target.value })
                             }}
                         />
+
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <DatePicker
+                                disableFuture
+                                openTo="year"
+                                views={['day', 'month', 'year']}
+                                value={FinalObj.dob}
+                                onChange={(newValue) => {
+                                    setValue(newValue);
+                                    setFinalObj({ ...FinalObj, dob: newValue })
+                                }}
+
+                                renderInput={(params) =>
+                                    <TextField {...params}
+                                        label="Select Birth Date"
+                                        color="success"
+                                        variant="outlined"
+                                        size="small"
+                                        sx={{ width: 300, color: "success", outlineColor: "success" }}
+                                    />}
+                            />
+                        </LocalizationProvider>
+
                         <br />
 
                         <Box
@@ -283,92 +347,75 @@ function Update() {
 
                         </Box>
 
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                            <DatePicker
-                                disableFuture
-                                openTo="year"
-                                views={['day', 'month', 'year']}
-                                value={FinalObj.dob}
-                                onChange={(newValue) => {
-                                    setValue(newValue);
-                                    setFinalObj({ ...FinalObj, dob: newValue })
-                                }}
 
-                                renderInput={(params) =>
-                                    <TextField {...params}
-                                        label="Select Birth Date"
-                                        color="success"
-                                        variant="outlined"
-                                        size="small"
-                                        sx={{ width: 300, color: "success", outlineColor: "success" }}
-                                    />}
-                            />
-                        </LocalizationProvider>
+                        <Stack
+                            spacing={4}
+                            direction="row"
+                        >
+                            <Box component="div">
 
+                                <FormControl>
+                                    <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel>
+                                    <RadioGroup
+                                        aria-labelledby="demo-radio-buttons-group-label"
+                                        value={FinalObj.gender}
+                                        name="radio-buttons-group"
 
-
-                        <FormControl>
-                            <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel>
-                            <RadioGroup
-                                aria-labelledby="demo-radio-buttons-group-label"
-                                value={FinalObj.gender}
-                                name="radio-buttons-group"
-
-                                onChange={(e) => {
-                                    setFinalObj({ ...FinalObj, gender: e.target.value })
-                                }}
-                                row
-                            >
-                                <FormControlLabel value="female" control={<Radio />} label="Female" />
-                                <FormControlLabel value="male" control={<Radio />} label="Male" />
-                                <FormControlLabel value="other" control={<Radio />} label="Other" />
-                            </RadioGroup>
-                        </FormControl>
-
-                        {/* <?? */}
-
-                        <FormGroup
-                            component="div"
-                            sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}
-                            row>
-                            <FormLabel id="demo-checkbox-buttons-group-label">Select Your Hobbies</FormLabel>
-                            <Box>
-                                <FormControlLabel control={<Checkbox
-                                    id="0"
-                                    checked={checkbox[0]}
-                                    onChange={(e) => {
-                                        handleCheckbox(e)
-                                    }}
-                                />}
-                                    label="Readings Blogs"
-                                />
-                                <FormControlLabel control={<Checkbox
-                                    id="1"
-                                    checked={checkbox[1]}
-                                    onChange={(e) => handleCheckbox(e)
-                                    }
-                                />} label="Watchings Tech Videos" />
-                                <FormControlLabel control={<Checkbox
-                                    id="2"
-                                    checked={checkbox[2]}
-                                    onChange={(e) => handleCheckbox(e)
-                                    }
-                                />} label="Playing Computer Games" />
-                                <FormControlLabel control={<Checkbox
-                                    id="3"
-                                    checked={checkbox[3]}
-                                    onChange={(e) => handleCheckbox(e)
-                                    }
-                                />} label="Playing Ground Games" />
-                                <FormControlLabel control={<Checkbox
-                                    id="4"
-                                    checked={checkbox[4]}
-                                    onChange={(e) => handleCheckbox(e)
-                                    }
-                                />} label="Listning Music" />
+                                        onChange={(e) => {
+                                            setFinalObj({ ...FinalObj, gender: e.target.value })
+                                        }}
+                                        row
+                                    >
+                                        <FormControlLabel value="female" control={<Radio />} label="Female" />
+                                        <FormControlLabel value="male" control={<Radio />} label="Male" />
+                                        <FormControlLabel value="other" control={<Radio />} label="Other" />
+                                    </RadioGroup>
+                                </FormControl>
                             </Box>
-                        </FormGroup>
-
+                            <Box component="div">
+                                <FormGroup
+                                    component="div"
+                                    sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}
+                                    row>
+                                    <FormLabel id="demo-checkbox-buttons-group-label">Select Your Hobbies</FormLabel>
+                                    <Box>
+                                        <FormControlLabel control={<Checkbox
+                                            id="0"
+                                            checked={checkbox[0]}
+                                            onChange={(e) => {
+                                                handleCheckbox(e)
+                                            }}
+                                        />}
+                                            label="Readings Blogs"
+                                        />
+                                        <FormControlLabel control={<Checkbox
+                                            id="1"
+                                            checked={checkbox[1]}
+                                            onChange={(e) => handleCheckbox(e)
+                                            }
+                                        />} label="Watchings Tech Videos" />
+                                        <FormControlLabel control={<Checkbox
+                                            id="2"
+                                            checked={checkbox[2]}
+                                            onChange={(e) => handleCheckbox(e)
+                                            }
+                                        />} label="Playing Computer Games" />
+                                        <FormControlLabel control={<Checkbox
+                                            id="3"
+                                            checked={checkbox[3]}
+                                            onChange={(e) => handleCheckbox(e)
+                                            }
+                                        />} label="Playing Ground Games" />
+                                        <FormControlLabel control={<Checkbox
+                                            id="4"
+                                            checked={checkbox[4]}
+                                            onChange={(e) => handleCheckbox(e)
+                                            }
+                                        />} label="Listning Music" />
+                                    </Box>
+                                </FormGroup>
+                            </Box>
+                        </Stack>
                         <Box>
                             <Typography id="non-linear-slider" gutterBottom>
                                 Rate your communication skills  (1-5)
