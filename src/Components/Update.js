@@ -20,9 +20,10 @@ import Typography from '@mui/material/Typography';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import { getDataFromLocalStorage, getOneData, putDataToLocalStorage } from '../Service/Service'
+import { getDataFromLocalStorage, getOneData, updateData } from '../Service/Service'
+import { useParams, useNavigate } from 'react-router-dom';
 
-import { useParams } from 'react-router-dom';
+
 const l = (arg) => console.log(arg)
 
 
@@ -32,6 +33,7 @@ let initailData = { gender: "female", name: '', mobileNumber: '', email: '', pas
 
 function Update() {
     let params = useParams();
+    let Navigate = useNavigate();
     const [value, setValue] = React.useState('');
     const [sliderValue, setSliderValue] = React.useState(0);
     const [locationData, setLocationData] = useState({ citiesData: [], statesData: [] });
@@ -42,6 +44,7 @@ function Update() {
     const [FinalObj, setFinalObj] = useState(initailData);
 
     const submitData = async (e, obj) => {
+        e.preventDefault();
         if (Error.name === true || Error.mobileNumber === true) {
             alert("please provide proper information")
 
@@ -50,14 +53,14 @@ function Update() {
 
         let obj1 = {
             ...obj,
+            rate: sliderValue,
             checkbox
         }
 
-        let res = await getDataFromLocalStorage('employeedata');
-        res = res ? res : [];
-        res.push(obj1);
-        await putDataToLocalStorage("employeedata", res);
+        // l(obj1);
+        await updateData('employeedata', obj1);
         setFinalObj(initailData);
+        Navigate("/");
     }
 
     const handleCheckbox = (e) => {
