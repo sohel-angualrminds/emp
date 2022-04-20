@@ -291,6 +291,7 @@ function Update() {
                                 id="states"
                                 options={locationData.statesData}
                                 getOptionLabel={(state) => state.name}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
                                 value={FinalObj.state ? { name: FinalObj.state } : { name: '' }}
                                 onChange={(e, newValue) => {
                                     e.preventDefault();
@@ -322,6 +323,7 @@ function Update() {
                                 id="cities"
                                 options={locationData.citiesData}
                                 getOptionLabel={(city) => city.name}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
                                 value={FinalObj.city ? { name: FinalObj.city } : { name: '' }}
                                 onChange={(e, newValue) => {
                                     e.preventDefault();
